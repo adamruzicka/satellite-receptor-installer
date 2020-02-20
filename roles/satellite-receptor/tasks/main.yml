@@ -6,6 +6,7 @@
         url: "{{ satellite_url }}api/status"
         user: "{{ satellite_user }}"
         password: "{{ satellite_password }}"
+        force_basic_auth: yes
     - name: User has permissions to read organizations and run Ansible playbooks
       debug:
         msg: "FIXME"
