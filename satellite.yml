@@ -42,3 +42,12 @@
           cat <<EOF | scl enable rh-python36 bash
           source /root/receptor-venv/bin/activate && exec receptor $*
           EOF
+- hosts: all
+  tasks:
+    - name: "Show instructions"
+      debug:
+        msg: |
+
+          Satellite UUID is {{ satellite_uuid }}
+
+          Registered accounts are {{ account_dirs }}
