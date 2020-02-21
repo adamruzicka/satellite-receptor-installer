@@ -1,0 +1,44 @@
+---
+- hosts: all
+  vars:
+    satellite_url: "https://dell-per640-03.dell2.lab.eng.bos.redhat.com/"
+    satellite_user: fifi
+    satellite_password: changeme
+    receptor_packages:
+      - http://download.eng.bos.redhat.com/brewroot/vol/rhel-7/packages/receptor/0.5.0/2.el7ar/noarch/receptor-0.5.0-2.el7ar.noarch.rpm
+      - http://download.eng.bos.redhat.com/brewroot/vol/rhel-7/packages/python-receptor-satellite/1.0.0/2.el7sat/noarch/python3-receptor-satellite-1.0.0-2.el7sat.noarch.rpm
+  roles:
+  - satellite-receptor
+- hosts: all
+  tasks:
+    - git:
+        dest: /root/receptor
+        repo: https://github.com/project-receptor/receptor
+    - git:
+        dest: /root/receptor-satellite
+        repo: https://github.com/adamruzicka/receptor-satellite
+    - package:
+        name:
+          - rh-python36
+          - rh-python36-python-virtualenv
+        state: installed
+    - shell: |
+        cat <<EOF | scl enable rh-python36 bash
+        virtualenv /root/receptor-venv
+        source /root/receptor-venv/bin/activate
+        pip install poetry
+        cd /root/receptor
+        poetry install
+        cd /root/receptor-satellite
+        python setup.py install
+        EOF
+
+    - copy:
+        dest: /usr/bin/receptor
+        mode: "a=rx"
+        content: |
+          #!/bin/sh
+
+          cat <<EOF | scl enable rh-python36 bash
+          source /root/receptor-venv/bin/activate && exec receptor $*
+          EOF
